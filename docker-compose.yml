@@ -1,0 +1,28 @@
+# Конвейер черновой нарезки: закинули видео в ./inbox, через пару минут забрали XML из ./out_xml.
+# Запуск: docker compose up -d --build
+# Исходники монтируются только для чтения (:ro): контейнер физически не может их изменить.
+services:
+  auto-editor-watcher:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM python:3.12-slim
+        RUN apt-get update \
+         && apt-get install -y --no-install-recommends ffmpeg \
+         && rm -rf /var/lib/apt/lists/* \
+         && pip install --no-cache-dir auto-editor
+        WORKDIR /app
+    command: ["python", "/app/watcher.py"]
+    restart: unless-stopped
+    environment:
+      INBOX: /inbox
+      OUT_XML: /out_xml
+      MARGIN: 0.2sec
+      THRESHOLD: 4%          # шумная запись: 8%
+      EXPORT: premiere       # premiere (Premiere Pro, XML) или resolve (DaVinci Resolve, FCPXML)
+      POLL_SECONDS: "5"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./watcher.py:/app/watcher.py:ro
+      - ./inbox:/inbox:ro
+      - ./out_xml:/out_xml

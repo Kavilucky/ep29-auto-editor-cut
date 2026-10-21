@@ -1,0 +1,43 @@
+@echo off
+chcp 65001 >nul
+setlocal
+
+rem PRESET: Premiere Pro, noisy room
+rem Drag a video file onto this bat. Output: <video>_cut_noisy.xml next to the source (Premiere Pro).
+rem The source video is never re-encoded, moved or deleted: only a timeline file is created.
+rem Start values (threshold 8%, margin 0.3sec) are a starting point: tune them for your recording.
+
+if "%~1"=="" (
+  echo Перетащите видеофайл на этот батник мышкой.
+  pause
+  exit /b 1
+)
+
+where auto-editor >nul 2>nul
+if errorlevel 1 (
+  echo ОШИБКА: auto-editor не найден в PATH. Установите: pip install auto-editor
+  pause
+  exit /b 1
+)
+
+where ffmpeg >nul 2>nul
+if errorlevel 1 (
+  echo ОШИБКА: ffmpeg не найден в PATH. Установите FFmpeg и добавьте папку bin в PATH.
+  pause
+  exit /b 1
+)
+
+echo Пресет: Premiere Pro, шумное помещение или тихая речь
+echo Анализ тишины: "%~1"
+auto-editor "%~1" --edit audio:threshold=8% --margin 0.3sec --export premiere -o "%~dpn1_cut_noisy.xml"
+if errorlevel 1 (
+  echo ОШИБКА: auto-editor завершился с ошибкой. Исходный файл не тронут.
+  echo Проверьте синтаксис флагов для вашей версии: auto-editor --help
+  pause
+  exit /b 1
+)
+
+echo Готово: "%~dpn1_cut_noisy.xml"
+echo Импортируйте файл в Premiere Pro. Исходное видео не изменено.
+pause
+exit /b 0

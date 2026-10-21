@@ -1,0 +1,17 @@
+.env
+*.env
+config.json
+passwd
+*.log
+__pycache__/
+.venv/
+*.pyc
+# видео пользователя и результаты не коммитятся
+inbox/*
+out_xml/*
+!inbox/.gitkeep
+!out_xml/.gitkeep
+*.mp4
+*.mov
+*.mkv
+*.wav
